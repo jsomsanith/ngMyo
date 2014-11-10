@@ -1,0 +1,28 @@
+{
+  "name": "ngMyo",
+  "version": "1.0.0",
+  "homepage": "https://github.com/JSO-Technologies/ngMyo",
+  "authors": [
+    "JSO-Technologies <JSO.Technologies@gmail.com>"
+  ],
+  "description": "Angular module for Thalmic Myo Armband control",
+  "main": "dist/ngMyo.js",
+  "keywords": [
+    "angular",
+    "angularJS",
+    "module",
+    "myo",
+    "ngMyo",
+    "thalmic"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "devDependencies": {
+    "angular": "~1.x.x"
+  }
+}
