@@ -10,6 +10,19 @@
         var eventsByDevice = new Map();
         var lockTimeouts = new Map();
 
+        /************************************** Getters ***************************************/
+	    this.getDevice = function(deviceID) {
+		    return devices.get(deviceID);
+	    };
+
+	    this.getEventsForDevice = function(deviceID) {
+		    return eventsByDevice.get(deviceID);
+	    };
+
+	    this.getOptions = function() {
+		    return instanceOptions;
+	    };
+
         /************************************** helpers ***************************************/
         /**
          * Test if orientation request should be skipped.
