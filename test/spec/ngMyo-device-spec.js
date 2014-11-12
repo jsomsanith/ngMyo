@@ -225,7 +225,7 @@ describe('ngMyo device', function() {
                     orientation: data.orientation,
                     rpy: rpy,
                     rpyDiff: rpyDiff
-                }
+                };
 
                 //when
                 device.onOrientation(data, rpy, rpyDiff);

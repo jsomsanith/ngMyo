@@ -5,3 +5,5 @@ function WebSocketMock() {
         console.log(message);
     }
 }
+
+var webSocketServerMock = new WebSocketMock();
