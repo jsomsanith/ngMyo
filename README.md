@@ -73,7 +73,7 @@ name        | description                                            | Callback 
 orientation | The user moves his arm. | device:MyoDevice, data:{accelerometer,gyroscope,orientation,rpy,rpyDiff}<ul><li>data.accelerometer: x,y,z - acceleration in G unit</li><li>data.gyroscope: x,y,z - movement in rad/sec</li><li>data.orientation: x,y,z,w - quaternion</li><li>data.rpy: roll, pitch, yaw - calculated if the useRollPitchYaw option (see Myo Options below) is true.</li><li>data.rpyDiff: roll, pitch, yaw - calculated diff if offset is defined in MyoDevice (see MyoDevice)</li></ul>
 pose | The user executes a pose : 'thumb_to_pinky', 'fingers_spread', 'wave_in', 'wave_out', 'fist'. These values must be passed to Myo.on. Do not pass 'pose' to register a callback. | device:MyoDevice
 arm_recognized | The user performs the arm recognized movement | device:MyoDevice
-arm_lost | The armband has lost the arm recognition [ device:MyoDevice
+arm_lost | The armband has lost the arm recognition | device:MyoDevice
 
 ##### Myo Options
 
