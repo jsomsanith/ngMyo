@@ -106,4 +106,4 @@ direction | _none_ | Get the Myo armband direction. 1 if x_direction is toward_w
 onOrientation | data:Object, rpy:Object, rpyDiff:Object | Trigger all 'orientation' callbacks with the provided values. Data must contains accelerometer, gyroscope and orientation. Rpy is the roll/pitch/yaw object. RpyDiff is the calculated roll/pitch/yaw diff.
 onArmRecognized | data:Object | Set the direction using data.x_direction, and trigger all the 'arm_recongnized' callbacks
 onArmLost | _none_ | Trigger all the 'arm_lost' callbacks
-onPose | data:Object | Trigger all the data.pose callbacks. Data.pose must be ont of the Myo pose : : 'thumb_to_pinky', 'fingers_spread', 'wave_in', 'wave_out', 'fist'
+onPose | data:Object | Trigger all the data.pose callbacks. Data.pose must be ont of the Myo pose : 'thumb_to_pinky', 'fingers_spread', 'wave_in', 'wave_out', 'fist'
