@@ -204,9 +204,10 @@ function MyoDevice(id, version, ws, fnsByEvent) {
          *
          * @param quat - a quaternion
          * @param scale - the scale (roll, pitch and yaw will be within [0, scale]
+         * @param direction - the myo device x_direction. 1 : myo orientation 'toward_wrist', -1 : myo orientation 'toward_elbow'
          * @returns {{roll: number, pitch: number, yaw: number}}
          */
-        this.calculateRPY = function(quat, scale) {
+        this.calculateRPY = function(quat, scale, direction) {
             var rpyRad = {
                 roll: Math.atan2(2 * (quat.w * quat.x + quat.y * quat.z), 1 - 2 * (quat.x * quat.x + quat.y * quat.y)),
                 pitch: Math.asin(Math.max(-1, Math.min(1, 2 * (quat.w * quat.y - quat.z * quat.x)))),
@@ -214,8 +215,8 @@ function MyoDevice(id, version, ws, fnsByEvent) {
             };
 
             return {
-                roll: (rpyRad.roll + Math.PI)/(Math.PI * 2) * scale,
-                pitch: (rpyRad.pitch + Math.PI/2)/Math.PI * scale,
+                roll: (rpyRad.roll + Math.PI)/(Math.PI * 2) * scale * direction,
+                pitch: (rpyRad.pitch + Math.PI/2)/Math.PI * scale * direction,
                 yaw: (rpyRad.yaw + Math.PI)/(Math.PI * 2) * scale
             };
         };
@@ -237,12 +238,11 @@ function MyoDevice(id, version, ws, fnsByEvent) {
          * @param rpy - the current roll/pitch/yaw
          * @param rpyOffset - the starting roll/pitch/yaw
          * @param rpyScale - the roll/pitch/yaw scale
-         * @param direction - the myo device x_direction. 1 : myo orientation 'toward_wrist', -1 : myo orientation 'toward_elbow'
          * @returns {{roll: number, pitch: number, yaw: number}} - the roll/pitch/yaw diff
          */
-        this.calculateRPYDiff = function(rpy, rpyOffset, rpyScale, direction) {
-            var roll = adaptWithScale(rpy.roll - rpyOffset.roll, rpyScale) * direction;
-            var pitch = adaptWithScale(rpyOffset.pitch - rpy.pitch, rpyScale) * direction;
+        this.calculateRPYDiff = function(rpy, rpyOffset, rpyScale) {
+            var roll = adaptWithScale(rpy.roll - rpyOffset.roll, rpyScale);
+            var pitch = adaptWithScale(rpyOffset.pitch - rpy.pitch, rpyScale);
             var yaw =  adaptWithScale(rpyOffset.yaw - rpy.yaw, rpyScale);
 
             return {
@@ -279,6 +279,19 @@ function MyoDevice(id, version, ws, fnsByEvent) {
         var devices = new Map();
         var eventsByDevice = new Map();
         var lockTimeouts = new Map();
+
+        /************************************** Getters ***************************************/
+	    this.getDevice = function(deviceID) {
+		    return devices.get(deviceID);
+	    };
+
+	    this.getEventsForDevice = function(deviceID) {
+		    return eventsByDevice.get(deviceID);
+	    };
+
+	    this.getOptions = function() {
+		    return instanceOptions;
+	    };
 
         /************************************** helpers ***************************************/
         /**
@@ -428,9 +441,9 @@ function MyoDevice(id, version, ws, fnsByEvent) {
                 if(device && !device.isLocked() && !shouldSkipOrientation(device)) {
                     var rpy, rpyDiff;
                     if(instanceOptions.useRollPitchYaw) {
-                        rpy = MyoOrientation.calculateRPY(data.orientation, instanceOptions.rollPitchYawScale);
+                        rpy = MyoOrientation.calculateRPY(data.orientation, instanceOptions.rollPitchYawScale, device.direction());
                         if(device.rpyOffset()) {
-                            rpyDiff = MyoOrientation.calculateRPYDiff(rpy, device.rpyOffset(), instanceOptions.rollPitchYawScale, device.direction());
+                            rpyDiff = MyoOrientation.calculateRPYDiff(rpy, device.rpyOffset(), instanceOptions.rollPitchYawScale);
                         }
                     }
                     device.onOrientation(data, rpy, rpyDiff);
