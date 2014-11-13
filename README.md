@@ -41,6 +41,10 @@ function MyController(Myo) {
 angular.module('myAppModule').controller(['Myo', MyController]);
 ```
 
+## Example
+
+https://github.com/JSO-Technologies/angular-myo-demo
+
 ## Documentation
 
 ### Object and service
