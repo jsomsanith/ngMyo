@@ -171,9 +171,9 @@
                 if(device && !device.isLocked() && !shouldSkipOrientation(device)) {
                     var rpy, rpyDiff;
                     if(instanceOptions.useRollPitchYaw) {
-                        rpy = MyoOrientation.calculateRPY(data.orientation, instanceOptions.rollPitchYawScale);
+                        rpy = MyoOrientation.calculateRPY(data.orientation, instanceOptions.rollPitchYawScale, device.direction());
                         if(device.rpyOffset()) {
-                            rpyDiff = MyoOrientation.calculateRPYDiff(rpy, device.rpyOffset(), instanceOptions.rollPitchYawScale, device.direction());
+                            rpyDiff = MyoOrientation.calculateRPYDiff(rpy, device.rpyOffset(), instanceOptions.rollPitchYawScale);
                         }
                     }
                     device.onOrientation(data, rpy, rpyDiff);

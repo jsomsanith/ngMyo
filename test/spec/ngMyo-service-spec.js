@@ -824,6 +824,11 @@ describe('ngMyo Service', function() {
 				myo: 0,
 				version: [0, 8, 45]
 			}])});
+            webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+                type: 'arm_recognized',
+                myo: 0,
+                x_direction: 'toward_elbow'
+            }])});
 
 			var data = {
 				type: 'orientation',
@@ -851,7 +856,7 @@ describe('ngMyo Service', function() {
 
 			//then
 			expect(callbackFn).toHaveBeenCalled();
-			expect(MyoOrientation.calculateRPY).toHaveBeenCalledWith(data.orientation, 18);
+			expect(MyoOrientation.calculateRPY).toHaveBeenCalledWith(data.orientation, 18, -1);
 			expect(MyoOrientation.calculateRPYDiff).not.toHaveBeenCalled();
 			expect(Myo.getDevice(0).onOrientation).toHaveBeenCalledWith(data, rpy, undefined);
 		}));
@@ -908,8 +913,8 @@ describe('ngMyo Service', function() {
 
 			//then
 			expect(callbackFn).toHaveBeenCalled();
-			expect(MyoOrientation.calculateRPY).toHaveBeenCalledWith(data.orientation, 18);
-			expect(MyoOrientation.calculateRPYDiff).toHaveBeenCalledWith(rpy, offset, 18, -1);
+			expect(MyoOrientation.calculateRPY).toHaveBeenCalledWith(data.orientation, 18, -1);
+			expect(MyoOrientation.calculateRPYDiff).toHaveBeenCalledWith(rpy, offset, 18);
 			expect(Myo.getDevice(0).onOrientation).toHaveBeenCalledWith(data, rpy, rpyDiff);
 		}));
 
