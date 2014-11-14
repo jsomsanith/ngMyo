@@ -79,15 +79,18 @@ arm_lost | The armband has lost the arm recognition | device:MyoDevice
 
 name        | description                                            | Default value
 ------------|--------------------------------------------------------|--------------
-broadcastOnConnected | Boolean. If ngMyo should broadcast ('ngMyoConnected', myoId) on device connection | true
-broadcastOnDisconnected | Boolean. If ngMyo should broadcast ('ngMyoDisconnected', myoId) on device disconnection | true
-broadcastOnLockUnlock | Boolean. If ngMyo should broadcast ('ngMyoLock'/'ngMyoUnlock', myoId) on device lock/unlock | true
+timeBeforeReconnect | Integer. The number of milliseconds before reconnection when ngMyo lose websocket connection | 3000
+autoApply | Boolean. If true, ngMyo will trigger a safe digest at the end of websocket open and close, and at the end of each event | true
 skipOneOrientationEvery | Integer. The Myo armband trigger an orientation event every 20ms (on average). Depending on the callbacks, this can lead to performance issues. This option allows you to skip one event every {option} triggered event. | 2 (skip half of the events)
 useRollPitchYaw | Boolean. If true, ngMyo will calculate roll/pitch/yaw and pass them to the orientation callback functions | true
 rollPitchYawScale | Integer. Scale for roll/pitch/yaw. Each value will be between 0 and {option}. | 18
+broadcastOnConnected | Boolean. If ngMyo should broadcast ('ngMyoConnected', myoId) on device connection | true
+broadcastOnDisconnected | Boolean. If ngMyo should broadcast ('ngMyoDisconnected', myoId) on device disconnection | true
+broadcastOnLockUnlock | Boolean. If ngMyo should broadcast ('ngMyoLock'/'ngMyoUnlock', myoId) on device lock/unlock | true
 lockUnlockPose | String. Pose that will be used for lock/unlock device only. The registered callbacks for this pose event won't be triggered | 'thumb_to_pinky'
 lockUnlockPoseTime | Integer. The number of milliseconds that the user must execute du lockUnlockPoseTime to lock/unlock the device | 500
 poseTime | Integer. The number of milliseconds that the user must execute the pose to trigger the callbacks. This option limits the number of accidental pose. | 250
+
 
 ##### Myo device methods
 
