@@ -48,6 +48,15 @@
             return typeof variable === 'number' && (variable % 1) === 0;
         };
 
+        /**
+         * Call angular digest if not already in progress
+         */
+        var safeDigest = function() {
+            if (instanceOptions.autoApply && !$rootScope.$$phase) {
+                $rootScope.$digest();
+            }
+        };
+
         /*************************************** Events listeners ****************************************/
         /**
          *
@@ -86,6 +95,8 @@
          */
         var initOptions = function(customOptions) {
             if(customOptions) {
+                instanceOptions.autoApply = customOptions.autoApply !== undefined ? customOptions.autoApply : MyoOptions.autoApply;
+                instanceOptions.timeBeforeReconnect = isInteger(customOptions.timeBeforeReconnect) ? customOptions.timeBeforeReconnect : MyoOptions.timeBeforeReconnect;
                 instanceOptions.useRollPitchYaw = customOptions.useRollPitchYaw !== undefined ? customOptions.useRollPitchYaw : MyoOptions.useRollPitchYaw;
                 instanceOptions.rollPitchYawScale = customOptions.rollPitchYawScale !== undefined ? customOptions.rollPitchYawScale : MyoOptions.rollPitchYawScale;
                 instanceOptions.broadcastOnConnected = customOptions.broadcastOnConnected !== undefined ? customOptions.broadcastOnConnected : MyoOptions.broadcastOnConnected;
@@ -110,6 +121,20 @@
             }
 
             var ws = new $window.WebSocket(MyoOptions.wsUrl + MyoOptions.apiVersion);
+
+            ws.onopen = function() {
+                $rootScope.$broadcast('ngMyoStarted');
+                safeDigest();
+            };
+
+            ws.onclose = function() {
+                $rootScope.$broadcast('ngMyoClosed');
+                safeDigest();
+                $timeout(function() {
+                    initWebSocket();
+                }, instanceOptions.timeBeforeReconnect);
+            };
+
             ws.onmessage = function(message) {
                 var data = JSON.parse(message.data);
                 if(data[0] === 'event') {
@@ -136,6 +161,7 @@
                             console.log(data[1]);
                             break;
                     }
+                    safeDigest();
                 }
             };
 

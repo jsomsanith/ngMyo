@@ -52,7 +52,7 @@
                 roll: roll,
                 pitch: pitch,
                 yaw: yaw
-            }
+            };
         };
 
         var adaptWithScale = function(value, scale) {

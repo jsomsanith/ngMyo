@@ -185,12 +185,18 @@ function MyoDevice(id, version, ws, fnsByEvent) {
        .constant('MyoOptions', {
            wsUrl:                   'ws://127.0.0.1:10138/myo/',
            apiVersion:              1,
+           timeBeforeReconnect :    3000,
+
+           autoApply :              true,
+
+           skipOneOrientationEvery: 2,
            useRollPitchYaw:         true,
+           rollPitchYawScale:       18,
+
            broadcastOnConnected:    true,
            broadcastOnDisconnected: true,
            broadcastOnLockUnlock:   true,
-           skipOneOrientationEvery: 2,
-           rollPitchYawScale:       18,
+
            lockUnlockPose:          'thumb_to_pinky',
            lockUnlockPoseTime:      500,
            poseTime:                250
@@ -249,7 +255,7 @@ function MyoDevice(id, version, ws, fnsByEvent) {
                 roll: roll,
                 pitch: pitch,
                 yaw: yaw
-            }
+            };
         };
 
         var adaptWithScale = function(value, scale) {
@@ -318,6 +324,15 @@ function MyoDevice(id, version, ws, fnsByEvent) {
             return typeof variable === 'number' && (variable % 1) === 0;
         };
 
+        /**
+         * Call angular digest if not already in progress
+         */
+        var safeDigest = function() {
+            if (instanceOptions.autoApply && !$rootScope.$$phase) {
+                $rootScope.$digest();
+            }
+        };
+
         /*************************************** Events listeners ****************************************/
         /**
          *
@@ -356,6 +371,8 @@ function MyoDevice(id, version, ws, fnsByEvent) {
          */
         var initOptions = function(customOptions) {
             if(customOptions) {
+                instanceOptions.autoApply = customOptions.autoApply !== undefined ? customOptions.autoApply : MyoOptions.autoApply;
+                instanceOptions.timeBeforeReconnect = isInteger(customOptions.timeBeforeReconnect) ? customOptions.timeBeforeReconnect : MyoOptions.timeBeforeReconnect;
                 instanceOptions.useRollPitchYaw = customOptions.useRollPitchYaw !== undefined ? customOptions.useRollPitchYaw : MyoOptions.useRollPitchYaw;
                 instanceOptions.rollPitchYawScale = customOptions.rollPitchYawScale !== undefined ? customOptions.rollPitchYawScale : MyoOptions.rollPitchYawScale;
                 instanceOptions.broadcastOnConnected = customOptions.broadcastOnConnected !== undefined ? customOptions.broadcastOnConnected : MyoOptions.broadcastOnConnected;
@@ -380,6 +397,20 @@ function MyoDevice(id, version, ws, fnsByEvent) {
             }
 
             var ws = new $window.WebSocket(MyoOptions.wsUrl + MyoOptions.apiVersion);
+
+            ws.onopen = function() {
+                $rootScope.$broadcast('ngMyoStarted');
+                safeDigest();
+            };
+
+            ws.onclose = function() {
+                $rootScope.$broadcast('ngMyoClosed');
+                safeDigest();
+                $timeout(function() {
+                    initWebSocket();
+                }, instanceOptions.timeBeforeReconnect);
+            };
+
             ws.onmessage = function(message) {
                 var data = JSON.parse(message.data);
                 if(data[0] === 'event') {
@@ -406,6 +437,7 @@ function MyoDevice(id, version, ws, fnsByEvent) {
                             console.log(data[1]);
                             break;
                     }
+                    safeDigest();
                 }
             };
 

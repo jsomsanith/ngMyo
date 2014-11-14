@@ -328,6 +328,72 @@ describe('ngMyo Service', function() {
 			expect(instanceOptions.poseTime).toBe(250);
 		}));
 
+        it('should take custom lockUnlockPoseTime option', inject(function(Myo) {
+            //given
+            var options = {
+                timeBeforeReconnect: 1000
+            };
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.timeBeforeReconnect).toBe(1000);
+        }));
+
+        it('should take default timeBeforeReconnect option when not defined in custom options', inject(function(Myo) {
+            //given
+            var options = {};
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.timeBeforeReconnect).toBe(3000);
+        }));
+
+        it('should take default timeBeforeReconnect option when it is not an integer in custom options', inject(function(Myo) {
+            //given
+            var options = {
+                timeBeforeReconnect: 'aze'
+            };
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.timeBeforeReconnect).toBe(3000);
+        }));
+
+        it('should take custom autoApply option', inject(function(Myo) {
+            //given
+            var options = {
+                autoApply: false
+            };
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.autoApply).toBe(false);
+        }));
+
+        it('should take default autoApply option when not defined in custom options', inject(function(Myo) {
+            //given
+            var options = {};
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.autoApply).toBe(true);
+        }));
+
 		it('should take default options when no custom options is provided', inject(function(Myo, MyoOptions) {
 			//when
 			Myo.start();
@@ -336,6 +402,106 @@ describe('ngMyo Service', function() {
 			expect(Myo.getOptions()).toBe(MyoOptions);
 		}));
 	});
+
+    describe('websocket connection', function() {
+        beforeEach(function() {
+            module(function ($provide) {
+                $provide.value('$window', new WindowMock());
+            });
+
+        });
+        beforeEach(inject(function ($rootScope, $window) {
+            spyOn($rootScope, '$broadcast').and.callThrough();
+            spyOn($rootScope, '$digest').and.callThrough();
+            spyOn($window, 'WebSocket').and.callThrough();
+        }));
+
+        it('should broadcast ngMyoStarted and call digest on ws open', inject(function ($rootScope, Myo) {
+            //given
+            Myo.start({autoApply: true});
+
+            //when
+            webSocketServerMock.onopen();
+
+            //then
+            expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoStarted');
+            expect($rootScope.$digest).toHaveBeenCalled();
+        }));
+
+        it('should broadcast ngMyoStarted but not call digest on ws open with false autoApply option', inject(function ($rootScope, Myo) {
+            //given
+            Myo.start({autoApply: false});
+
+            //when
+            webSocketServerMock.onopen();
+
+            //then
+            expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoStarted');
+            expect($rootScope.$digest).not.toHaveBeenCalled();
+        }));
+
+        it('should broadcast ngMyoStarted but not call digest on ws open if digest is in progress', inject(function ($rootScope, Myo) {
+            //given
+            Myo.start({autoApply: true});
+            $rootScope.$$phase = true;
+
+            //when
+            webSocketServerMock.onopen();
+
+            //then
+            expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoStarted');
+            expect($rootScope.$digest).not.toHaveBeenCalled();
+        }));
+
+        it('should broadcast ngMyoClosed and call digest on ws close', inject(function ($rootScope, Myo) {
+            //given
+            Myo.start({autoApply: true});
+
+            //when
+            webSocketServerMock.onclose();
+
+            //then
+            expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoClosed');
+            expect($rootScope.$digest).toHaveBeenCalled();
+        }));
+
+        it('should broadcast ngMyoClosed but not call digest on ws close with false autoApply option', inject(function ($rootScope, Myo) {
+            //given
+            Myo.start({autoApply: false});
+
+            //when
+            webSocketServerMock.onclose();
+
+            //then
+            expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoClosed');
+            expect($rootScope.$digest).not.toHaveBeenCalled();
+        }));
+
+        it('should broadcast ngMyoClosed but not call digest on ws close if digest is in progress', inject(function ($rootScope, Myo) {
+            //given
+            Myo.start({autoApply: true});
+            $rootScope.$$phase = true;
+
+            //when
+            webSocketServerMock.onclose();
+
+            //then
+            expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoClosed');
+            expect($rootScope.$digest).not.toHaveBeenCalled();
+        }));
+
+        it('should attempt reconnection on ws close after timeBeforeReconnect option timeout', inject(function ($rootScope, $window, $timeout, Myo) {
+            //given
+            Myo.start({timeBeforeReconnect: 5000});
+
+            //when
+            webSocketServerMock.onclose();
+            $timeout.flush();
+
+            //then
+            expect($window.WebSocket.calls.count()).toBe(2);
+        }));
+    });
 
 	describe('on websocket message', function() {
 		beforeEach(function() {
