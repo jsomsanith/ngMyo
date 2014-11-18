@@ -52,6 +52,58 @@ describe('ngMyo Service', function() {
 			});
 		});
 
+        it('should take custom wsUrl option', inject(function(Myo) {
+            //given
+            var options = {
+                wsUrl: 'ws://125.125.125.125:11111/myo'
+            };
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.wsUrl).toBe('ws://125.125.125.125:11111/myo');
+        }));
+
+        it('should take default wsUrl option when not defined in custom options', inject(function(Myo) {
+            //given
+            var options = {};
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.wsUrl).toBe('ws://127.0.0.1:10138/myo/');
+        }));
+
+        it('should take custom apiVersion option', inject(function(Myo) {
+            //given
+            var options = {
+                apiVersion: 5
+            };
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.apiVersion).toBe(5);
+        }));
+
+        it('should take default apiVersion option when not defined in custom options', inject(function(Myo) {
+            //given
+            var options = {};
+
+            //when
+            Myo.start(options);
+
+            //then
+            var instanceOptions = Myo.getOptions();
+            expect(instanceOptions.apiVersion).toBe(2);
+        }));
+
 		it('should take custom useRollPitchYaw option', inject(function(Myo) {
 			//given
 			var options = {

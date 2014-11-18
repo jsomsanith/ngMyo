@@ -95,6 +95,8 @@
          */
         var initOptions = function(customOptions) {
             if(customOptions) {
+                instanceOptions.wsUrl = customOptions.wsUrl !== undefined ? customOptions.wsUrl : MyoOptions.wsUrl;
+                instanceOptions.apiVersion = customOptions.apiVersion !== undefined ? customOptions.apiVersion : MyoOptions.apiVersion;
                 instanceOptions.autoApply = customOptions.autoApply !== undefined ? customOptions.autoApply : MyoOptions.autoApply;
                 instanceOptions.timeBeforeReconnect = isInteger(customOptions.timeBeforeReconnect) ? customOptions.timeBeforeReconnect : MyoOptions.timeBeforeReconnect;
                 instanceOptions.useRollPitchYaw = customOptions.useRollPitchYaw !== undefined ? customOptions.useRollPitchYaw : MyoOptions.useRollPitchYaw;
@@ -120,7 +122,7 @@
                 throw new Error('Socket not supported by browser');
             }
 
-            var ws = new $window.WebSocket(MyoOptions.wsUrl + MyoOptions.apiVersion);
+            var ws = new $window.WebSocket(instanceOptions.wsUrl + instanceOptions.apiVersion);
 
             ws.onopen = function() {
                 $rootScope.$broadcast('ngMyoStarted');
@@ -152,9 +154,11 @@
                             unregisterDevice(data[1]);
                             break;
                         case 'arm_recognized' :
+                        case 'arm_synced' :
                             triggerArmRecognized(data[1]);
                             break;
                         case 'arm_lost' :
+                        case 'arm_unsynced' :
                             triggerArmLost(data[1]);
                             break;
                         default :

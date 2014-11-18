@@ -4,7 +4,7 @@
    angular.module('ngMyo', [])
        .constant('MyoOptions', {
            wsUrl:                   'ws://127.0.0.1:10138/myo/',
-           apiVersion:              1,
+           apiVersion:              2,
            timeBeforeReconnect :    3000,
 
            autoApply :              true,
