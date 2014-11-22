@@ -72,13 +72,15 @@ name        | description                                            | Callback 
 ------------|--------------------------------------------------------|----------------------------
 orientation | The user moves his arm. | device:MyoDevice, data:{accelerometer,gyroscope,orientation,rpy,rpyDiff}<ul><li>data.accelerometer: x,y,z - acceleration in G unit</li><li>data.gyroscope: x,y,z - movement in rad/sec</li><li>data.orientation: x,y,z,w - quaternion</li><li>data.rpy: roll, pitch, yaw - calculated if the useRollPitchYaw option (see Myo Options below) is true.</li><li>data.rpyDiff: roll, pitch, yaw - calculated diff if offset is defined in MyoDevice (see MyoDevice)</li></ul>
 pose | The user executes a pose : 'thumb_to_pinky', 'fingers_spread', 'wave_in', 'wave_out', 'fist'. These values must be passed to Myo.on. Do not pass 'pose' to register a callback. | device:MyoDevice
-arm_recognized | The user performs the arm recognized movement | device:MyoDevice
-arm_lost | The armband has lost the arm recognition | device:MyoDevice
+arm_recognized (api 1) or arm_synced (api 2) | The user performs the arm recognized movement | device:MyoDevice
+arm_lost (api 1) or arm_unsynced (api 2) | The armband has lost the arm recognition | device:MyoDevice
 
 ##### Myo Options
 
 name        | description                                            | Default value
 ------------|--------------------------------------------------------|--------------
+wsUrl (since 0.2.0) | String. The websocket url. | ws://127.0.0.1:10138/myo/
+apiVersion (since 0.2.0) | Integer. The api version used in full websocket url. | 2
 timeBeforeReconnect | Integer. The number of milliseconds before reconnection when ngMyo lose websocket connection | 3000
 autoApply | Boolean. If true, ngMyo will trigger a safe digest at the end of websocket open and close, and at the end of each event | true
 skipOneOrientationEvery | Integer. The Myo armband trigger an orientation event every 20ms (on average). Depending on the callbacks, this can lead to performance issues. This option allows you to skip one event every {option} triggered event. | 2 (skip half of the events)
@@ -110,3 +112,9 @@ onOrientation | data:Object, rpy:Object, rpyDiff:Object | Trigger all 'orientati
 onArmRecognized | data:Object | Set the direction using data.x_direction, and trigger all the 'arm_recongnized' callbacks
 onArmLost | _none_ | Trigger all the 'arm_lost' callbacks
 onPose | data:Object | Trigger all the data.pose callbacks. Data.pose must be ont of the Myo pose : 'thumb_to_pinky', 'fingers_spread', 'wave_in', 'wave_out', 'fist'
+
+## Change log
+### 0.2.0 : Firmware 1.0.3 support
+Arm_recognized and arm_lost become arm_synced and arm_unsynced. The first 2 ones are still supported
+Api version is now on version 2. The websocket url has changed. By default, ngMyo will connect to api 2.
+NgMyo options: add websocket url and api version.
