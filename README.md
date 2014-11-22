@@ -6,6 +6,8 @@ It uses the thalmic lab Myo websocket api.
 
 NgMyo calculate the roll/pitch/yaw for you (http://en.wikipedia.org/wiki/Flight_dynamics) which is easier to use than raw data.
 
+An example of ngMyo use : https://github.com/JSO-Technologies/angular-myo-demo
+
 ## Installation
 
 Using bower : 
