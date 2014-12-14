@@ -76,31 +76,28 @@ describe('ngMyo device', function() {
         });
 
         describe('lock', function() {
-            it('should lock device and vibrate shortly twice', function() {
+            it('should lock device', function() {
                 //given
-                expect(device.isLocked()).toBe(false);
+                expect(device.isLocked()).toBeFalsy();
 
                 //when
                 device.lock();
 
                 //then
                 expect(device.isLocked()).toBe(true);
-                expect(device.vibrate.calls.count()).toEqual(2);
-                expect(device.vibrate.calls.argsFor(0)).toEqual(['short']);
-                expect(device.vibrate.calls.argsFor(1)).toEqual(['short']);
+                expect(ws.send).toHaveBeenCalledWith('["command",{"command":"lock","myo":0}]');
             });
 
-            it('should unlock device and vibrate once with medium intensity', function() {
+            it('should unlock device', function() {
                 //given
-                device.lock();
+                device.setLock(true);
 
                 //when
                 device.unlock();
 
                 //then
                 expect(device.isLocked()).toBe(false);
-                expect(device.vibrate.calls.count()).toEqual(3);
-                expect(device.vibrate.calls.argsFor(3)).toEqual([]);
+                expect(ws.send).toHaveBeenCalledWith('["command",{"command":"unlock","myo":0,"type":"hold"}]');
             });
 
             it('should lock when device is unlocked', function() {

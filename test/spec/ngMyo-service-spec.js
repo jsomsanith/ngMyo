@@ -101,7 +101,7 @@ describe('ngMyo Service', function() {
 
             //then
             var instanceOptions = Myo.getOptions();
-            expect(instanceOptions.apiVersion).toBe(2);
+            expect(instanceOptions.apiVersion).toBe(3);
         }));
 
 		it('should take custom useRollPitchYaw option', inject(function(Myo) {
@@ -1146,5 +1146,120 @@ describe('ngMyo Service', function() {
 			//then
 			//no crash
 		}));
+
+		/////////////////////////////////////////////////////////////////////////////////////////
+		it('should call lock device and broadcast event on when device is registered and unlocked', inject(function ($rootScope, $timeout, Myo) {
+			//given
+			Myo.start({
+				lockUnlockPoseTime: 500,
+				broadcastOnLockUnlock: true
+			});
+
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'connected',
+				myo: 0,
+				version: [0, 8, 45]
+			}])});
+			expect(Myo.getDevice(0).isLocked()).toBe(false);
+
+			//when
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'pose',
+				pose: 'double_tap',
+				myo: 0
+			}])});
+
+			//then
+			expect(Myo.getDevice(0).isLocked()).toBe(true);
+			expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoLock', 0);
+		}));
+
+		/*it('should lock device with a timeout and not broadcast event on lock pose when device is registered and unlocked', inject(function ($rootScope, $timeout, Myo) {
+			//given
+			Myo.start({
+				broadcastOnConnected: false,
+				lockUnlockPose: 'thumb_to_pinky',
+				lockUnlockPoseTime: 500,
+				broadcastOnLockUnlock: false
+			});
+
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'connected',
+				myo: 0,
+				version: [0, 8, 45]
+			}])});
+			expect(Myo.getDevice(0).isLocked()).toBe(false);
+
+			//when
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'pose',
+				pose: 'thumb_to_pinky',
+				myo: 0
+			}])});
+			$timeout.flush(500);
+
+			//then
+			expect(Myo.getDevice(0).isLocked()).toBe(true);
+			expect($rootScope.$broadcast).not.toHaveBeenCalled();
+		}));
+
+		it('should unlock device with a timeout and broadcast event on lock pose when device is registered and locked', inject(function ($rootScope, $timeout, Myo) {
+			//given
+			Myo.start({
+				lockUnlockPose: 'thumb_to_pinky',
+				lockUnlockPoseTime: 500,
+				broadcastOnLockUnlock: true
+			});
+
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'connected',
+				myo: 0,
+				version: [0, 8, 45]
+			}])});
+			Myo.getDevice(0).lock();
+			expect(Myo.getDevice(0).isLocked()).toBe(true);
+
+			//when
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'pose',
+				pose: 'thumb_to_pinky',
+				myo: 0
+			}])});
+			$timeout.flush(500);
+
+			//then
+			expect(Myo.getDevice(0).isLocked()).toBe(false);
+			expect($rootScope.$broadcast).toHaveBeenCalledWith('ngMyoUnlock', 0);
+		}));
+
+		it('should unlock device with a timeout and not broadcast event on lock pose when device is registered and locked', inject(function ($rootScope, $timeout, Myo) {
+			//given
+			Myo.start({
+				broadcastOnConnected: false,
+				lockUnlockPose: 'thumb_to_pinky',
+				lockUnlockPoseTime: 500,
+				broadcastOnLockUnlock: false
+			});
+
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'connected',
+				myo: 0,
+				version: [0, 8, 45]
+			}])});
+			Myo.getDevice(0).lock();
+			expect(Myo.getDevice(0).isLocked()).toBe(true);
+
+			//when
+			webSocketServerMock.onmessage({data: JSON.stringify(['event',{
+				type: 'pose',
+				pose: 'thumb_to_pinky',
+				myo: 0
+			}])});
+			$timeout.flush(500);
+
+			//then
+			expect(Myo.getDevice(0).isLocked()).toBe(false);
+			expect($rootScope.$broadcast).not.toHaveBeenCalled();
+		}));*/
 	});
 });

@@ -15,24 +15,37 @@ function MyoDevice(id, version, ws, fnsByEvent) {
         return orientationRequestNb++;
     };
 
+    /*********************************** Myo init **********************************/
+    this.init = function() {
+        this.unlock();
+    }
+
     /*********************************** Myo Lock **********************************/
-    var locked = false;
+    var locked;
 
     /**
-     * Lock the device and perform a double short vibration
+     * Lock the device
      */
     this.lock = function() {
+        self.ws.send(JSON.stringify(['command',{
+            command: 'lock',
+            myo: self.id
+        }]));
+
         locked = true;
-        self.vibrate('short');
-        self.vibrate('short');
     };
 
     /**
-     * Unlock the device and perform a medium vibration
+     * Unlock the device in hold mode (no timing)
      */
-    this.unlock = function() {
+    this.unlock = function() {console.log('unlock');
+        self.ws.send(JSON.stringify(['command',{
+            command: 'unlock',
+            myo: self.id,
+            type: "hold"
+        }]));
+
         locked = false;
-        self.vibrate();
     };
 
     /**
@@ -54,6 +67,14 @@ function MyoDevice(id, version, ws, fnsByEvent) {
     this.isLocked = function() {
         return locked;
     };
+
+    /**
+     * Update the lock flag
+     * @param deviceIsLocked - the new lock flag value
+     */
+    this.setLock = function(deviceIsLocked) {
+        this.locked = deviceIsLocked;
+    }
 
     /********************************* Myo vibration ********************************/
     /**

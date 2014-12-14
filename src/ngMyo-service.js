@@ -147,6 +147,10 @@
                         case 'pose' :
                             triggerPose(data[1]);
                             break;
+                        case 'locked' :
+                        case 'unlocked' :
+                            triggerArmbandLockUnlock(data[1]);
+                            break;
                         case 'connected' :
                             registerDevice(data[1]);
                             break;
@@ -174,7 +178,10 @@
              * @param data - websocket data
              */
             var registerDevice = function(data) {
-                devices.set(data.myo, new MyoDevice(data.myo, data.version.join('.'), ws, eventsByDevice.get(data.myo)));
+                var myoDevice = new MyoDevice(data.myo, data.version.join('.'), ws, eventsByDevice.get(data.myo))
+                myoDevice.init();
+
+                devices.set(data.myo, myoDevice);
                 if(instanceOptions.broadcastOnConnected) {
                     $rootScope.$broadcast('ngMyoConnected', data.myo);
                 }
@@ -232,6 +239,16 @@
                 }
             };
 
+            var triggerArmbandLockUnlock = function(data) {
+                var device = devices.get(data.myo);
+                if(device) {
+                    if((data.type === 'locked' && !device.isLocked()) ||
+                        data.type === 'unlocked' && device.isLocked()) {
+                        lockUnlockDevice(device);
+                    }
+                }
+            }
+
             /**
              * Action whe user perform a pose.
              * If pose is lock/unlock pose (defined in options, default is 'thumb_to_pinky'), only lock/unlock is performed.
@@ -239,14 +256,19 @@
              * @param data - websocket data
              */
             var triggerPose = function(data) {
+                console.log(data);
                 var device = devices.get(data.myo);
                 if(device) {
                     $timeout.cancel(lockTimeouts.get(data.myo));
 
-                    if(instanceOptions.lockUnlockPose === data.pose) {
+                    if('double_tap' === data.pose) {
                         lockUnlockDevice(device);
-
                     }
+
+                    if(instanceOptions.lockUnlockPose === data.pose) {
+                        createLockUnlockTimeout(device);
+                    }
+
                     else if(!device.isLocked()) {
                         executeDevicePose(device, data);
                     }
@@ -254,16 +276,24 @@
             };
 
             /**
-             * Lock or unlock device only if user perform the pose during the pose time defined in options (defaut 500ms).
+             * Actually lock or unlock the Myo device (called by createLockUnlockTimeout) and broadcast event depending on the options
              * @param device - the {@link MyoDevice}
              */
             var lockUnlockDevice = function(device) {
-                createTimeout(device.id, function() {
-                    device.lockOrUnlock();
+                device.lockOrUnlock();
 
-                    if(instanceOptions.broadcastOnLockUnlock) {
-                        $rootScope.$broadcast('ngMyo' + (device.isLocked() ? 'Lock' : 'Unlock'), device.id);
-                    }
+                if(instanceOptions.broadcastOnLockUnlock) {
+                    $rootScope.$broadcast('ngMyo' + (device.isLocked() ? 'Lock' : 'Unlock'), device.id);
+                }
+            };
+
+            /**
+             * Lock or unlock device only if user perform the pose during the pose time defined in options (defaut 500ms).
+             * @param device - the {@link MyoDevice}
+             */
+            var createLockUnlockTimeout = function(device) {
+                createTimeout(device.id, function() {
+                    lockUnlockDevice(device);
                 }, instanceOptions.lockUnlockPoseTime);
             };
 
