@@ -239,6 +239,10 @@
                 }
             };
 
+            /**
+             * Lock or unlock Myo device if device is registered and lock status is not already the one triggered
+             * @param data - websocket data
+             */
             var triggerArmbandLockUnlock = function(data) {
                 var device = devices.get(data.myo);
                 if(device) {
